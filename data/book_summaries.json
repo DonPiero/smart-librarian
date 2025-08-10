@@ -1,0 +1,52 @@
+[
+    {
+        "title": "The Hobbit",
+        "summary": "A fantasy adventure about a reluctant hobbit who joins a quest to reclaim a lost treasure. Themes: courage, friendship, magic.",
+        "full_summary": "Bilbo Baggins, a peaceful hobbit, is thrust into an epic quest when the wizard Gandalf and a band of dwarves recruit him to help recover a stolen treasure guarded by the fearsome dragon Smaug. Along the way, Bilbo faces trolls, goblins, and discovers the One Ring. This journey challenges him to grow in courage and self-confidence, forming lasting friendships and reshaping his identity."
+    },
+    {
+        "title": "1984",
+        "summary": "A dystopian tale of surveillance, control, and rebellion. Themes: freedom, totalitarianism, truth.",
+        "full_summary": "George Orwell’s 1984 explores a world dominated by a totalitarian regime where Big Brother monitors all. Winston Smith, a low-ranking member of the ruling Party, secretly dreams of freedom and begins a forbidden romance. As he delves deeper into rebellion, he confronts the terrifying power of the state and the fragility of truth in a world built on lies."
+    },
+    {
+        "title": "To Kill a Mockingbird",
+        "summary": "A story of racial injustice and childhood in the American South. Themes: morality, empathy, justice.",
+        "full_summary": "Harper Lee’s novel follows Scout Finch, a young girl growing up in a racially divided Southern town. Her father, Atticus, defends a Black man wrongly accused of assaulting a white woman. Through Scout’s eyes, we see the harsh realities of prejudice and the quiet strength it takes to stand for what is right."
+    },
+    {
+        "title": "The Little Prince",
+        "summary": "A poetic tale of innocence and discovery. Themes: love, loneliness, human nature.",
+        "full_summary": "A stranded aviator meets a mysterious young prince from another planet. As the Little Prince recounts his travels and the lessons he’s learned, the story unfolds as a meditation on growing up, love, and what truly matters. A timeless philosophical reflection told through a child’s eyes."
+    },
+    {
+        "title": "Brave New World",
+        "summary": "A future where happiness is engineered and individuality suppressed. Themes: conformity, control, freedom.",
+        "full_summary": "In Aldous Huxley’s imagined future, humans are mass-produced and conditioned for specific roles. Pleasure and stability replace freedom and truth. Bernard Marx begins to question this world, especially after meeting a 'savage' from outside society. His rebellion challenges the cost of comfort and the meaning of being human."
+    },
+    {
+        "title": "Frankenstein",
+        "summary": "A scientist creates life, but at a tragic cost. Themes: ambition, creation, isolation.",
+        "full_summary": "Victor Frankenstein, driven by scientific curiosity, reanimates a corpse—but his creation becomes a monster shunned by society. As the creature seeks understanding and revenge, the story becomes a haunting tale of guilt, responsibility, and the dangers of unchecked ambition."
+    },
+    {
+        "title": "The Catcher in the Rye",
+        "summary": "A teenager's cynical journey through New York. Themes: alienation, adolescence, identity.",
+        "full_summary": "Holden Caulfield, expelled from prep school, wanders New York City grappling with loss, loneliness, and the phoniness he sees in the adult world. His internal struggles reflect a longing to protect innocence in a world he feels disconnected from."
+    },
+    {
+        "title": "Animal Farm",
+        "summary": "An allegorical farm rebellion mirrors political corruption. Themes: power, revolution, inequality.",
+        "full_summary": "A group of farm animals overthrow their human owner to establish a society based on equality. But the pigs who lead soon become as oppressive as the humans they replaced. Orwell’s novella is a biting critique of revolutions gone wrong."
+    },
+    {
+        "title": "Life of Pi",
+        "summary": "A boy stranded at sea with a tiger. Themes: survival, faith, storytelling.",
+        "full_summary": "After a shipwreck, Pi Patel finds himself alone on a lifeboat in the Pacific Ocean with a Bengal tiger named Richard Parker. Their surreal, dangerous journey tests his faith and understanding of reality. The story explores the power of belief and the line between fact and fiction."
+    },
+    {
+        "title": "The Alchemist",
+        "summary": "A shepherd follows a dream across the desert. Themes: destiny, self-discovery, dreams.",
+        "full_summary": "Santiago, a young Andalusian shepherd, leaves his home to pursue a recurring dream of treasure near the Egyptian pyramids. His journey introduces him to mystics, challenges, and the idea that personal legends shape our lives. Coelho’s tale is a spiritual exploration of purpose and inner truth."
+    }
+]
