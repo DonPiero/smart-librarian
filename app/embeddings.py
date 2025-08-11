@@ -1,8 +1,7 @@
 from pathlib import Path
 import json
 from langchain_community.vectorstores import Chroma
-#from langchain_openai import OpenAIEmbeddings
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain.schema import Document
 from dotenv import load_dotenv
 
@@ -22,11 +21,7 @@ for book in books:
     )
     docs.append(doc)
 
-#embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
-
-embedding_model = HuggingFaceEmbeddings(
-    model_name="all-MiniLM-L6-v2"
-)
+embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
 
 vectorstore = Chroma.from_documents(
     documents=docs,
