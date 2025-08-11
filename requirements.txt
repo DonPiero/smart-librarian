@@ -2,6 +2,7 @@ langchain
 langchain-community
 langchain-openai
 langchain-core
+langchain-chroma
 chromadb
 openai
 streamlit
