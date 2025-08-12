@@ -1,4 +1,5 @@
 import json
+from retriever import search_books
 from pathlib import Path
 from langchain_core.tools import tool
 
@@ -22,3 +23,19 @@ def get_summary_by_title(title: str) -> str:
 
     except Exception as e:
         return f"We have encountered this error: {e}"
+
+@tool
+def search_relevant_books(query: str) -> str:
+    """
+        Search the library's book collection for the most relevant book.
+        Returns a string with title and summary.
+    """
+    matches = search_books(query, matches=3)
+
+    if not matches:
+        return "No relevant books were found in the collection."
+
+    return "\n\n".join([
+        f"Title: {doc.metadata['title']}\nSummary: {doc.page_content}"
+        for doc in matches
+    ])
