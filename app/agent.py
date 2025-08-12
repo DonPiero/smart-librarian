@@ -4,12 +4,14 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 from tools import get_summary_by_title, search_relevant_books, language_filter
+import warnings
 
+warnings.simplefilter("ignore", DeprecationWarning)
 load_dotenv()
 
 llm = ChatOpenAI(
     model="gpt-4o-mini",
-    temperature=0.7
+    temperature=0.8
 )
 
 tools = [get_summary_by_title, search_relevant_books]
