@@ -3,7 +3,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.agents import create_tool_calling_agent, AgentExecutor
-from tools import get_summary_by_title, search_relevant_books
+from tools import get_summary_by_title, search_relevant_books, language_filter
 
 load_dotenv()
 
@@ -43,8 +43,11 @@ executor = AgentExecutor(
 )
 
 def chat_with_agent(query: str) -> str:
+    query = query.strip()
+    if language_filter(query):
+        return "Please use a respectful language. After you calm down, we may resume our conversation."
     response = executor.invoke({"input": query})
-    return response["output"]
+    return response["output"].strip()
 
 
 if __name__ == "__main__":
