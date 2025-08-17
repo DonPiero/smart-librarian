@@ -1,6 +1,6 @@
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
-from langchain_chroma import Chroma
+from langchain_community.vectorstores import Chroma
 from langchain.schema import Document
 from pathlib import Path
 from typing import List
