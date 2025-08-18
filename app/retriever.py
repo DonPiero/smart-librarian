@@ -1,6 +1,6 @@
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain.schema import Document
 from pathlib import Path
 from typing import List
@@ -16,6 +16,6 @@ vectorstore = Chroma(
     persist_directory=str(CHROMA_PATH)
 )
 
-def search_books(inquiry: str, matches: int = 1) -> List[Document]:
+def search_books(inquiry: str, matches: int = 5) -> List[Document]:
     return vectorstore.similarity_search(inquiry, k=matches)
 

@@ -49,15 +49,20 @@ def get_summary_by_title(title: str) -> str:
 @tool
 def search_relevant_books(query: str) -> str:
     """
-        Search the library's book collection for the most relevant book.
-        Returns a string with title and summary.
+        Search the library's book collection for relevant books by genre, theme, or topic.
+        Returns a string with unique book titles in order.
     """
-    matches = search_books(query, matches=3)
+    matches = search_books(query, matches=5)
 
     if not matches:
-        return "No relevant books were found in the collection."
+        return "No matches found for your query."
 
-    return "\n\n".join([
-        f"Title: {doc.metadata['title']}\nSummary: {doc.page_content}"
-        for doc in matches
-    ])
+    seen = set()
+    results = []
+    for doc in matches:
+        title = doc.metadata.get("title", "").strip()
+        if title and title not in seen:
+            seen.add(title)
+            results.append(title)
+
+    return "\n".join(results)
