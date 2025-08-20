@@ -1,17 +1,18 @@
-from langchain_openai import OpenAIEmbeddings
-from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain.schema import Document
 from typing import List
 import json
-from app.config.constants import CHROMA_PATH, DATA_PATH
+from langchain_openai import OpenAIEmbeddings
 
-load_dotenv()
-embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+from app.config.constants import CHROMA_PATH, DATA_PATH, MODEL_CONFIG
+
+embedding_function = OpenAIEmbeddings(
+    model=MODEL_CONFIG.embedding_model
+)
 
 if CHROMA_PATH.exists() and any(CHROMA_PATH.iterdir()):
     vectorstore = Chroma(
-        embedding_function=embedding_model,
+        embedding_function=embedding_function,
         persist_directory=str(CHROMA_PATH)
     )
 else:
@@ -19,16 +20,17 @@ else:
         books = json.load(f)
 
     docs = [
-        Document(page_content=book["summary"], metadata={"title": book["title"]})
+        Document(page_content=book["summary"],
+                 metadata={"title": book["title"]})
         for book in books
     ]
 
     vectorstore = Chroma.from_documents(
         documents=docs,
-        embedding=embedding_model,
+        embedding=embedding_function,
         persist_directory=str(CHROMA_PATH)
     )
 
+
 def search_books(inquiry: str, matches: int = 5) -> List[Document]:
     return vectorstore.similarity_search(inquiry, k=matches)
-
