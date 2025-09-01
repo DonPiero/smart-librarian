@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart Librarian</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+      <div class="auth-box hidden">
+
+          <div class="toggle-group">
+            <button id="login-toggle" class="toggle-button selected" onclick="showLogin()">Login</button>
+            <button id="register-toggle" class="toggle-button" onclick="showRegister()">Register</button>
+          </div>
+
+          <form id="login-form" class="form-box">
+            <h2 class="main-title">SIGN IN</h2>
+            <input type="text" id="login-username" placeholder="Username" required />
+            <input type="password" id="login-password" placeholder="Password" required />
+            <button type="submit"><b>CONNECT NOW</b></button>
+            <p id="login-status"></p>
+          </form>
+
+          <form id="register-form" class="form-box hidden">
+            <h2 class="main-title">SIGN UP</h2>
+            <input type="text" id="register-username" placeholder="Username" required />
+            <input type="password" id="register-password" placeholder="Password" required />
+            <button type="submit"><b>CREATE ACCOUNT</b></button>
+            <p id="register-status"></p>
+          </form>
+      </div>
+
+    <div class="main-page">
+          <div class="sidebar">
+              <button id="new-chat">New Chat</button>
+              <button id="logout-button">Logout</button>
+              <h3>Your Chats</h3>
+              <ul id="chat-list"></ul>
+          </div>
+
+          <div class="chat-area">
+              <h1 class="main-title">Smart Librarian</h1>
+
+              <div id="messages"></div>
+
+              <div class="input-area">
+                <textarea id="message-input" placeholder="Type your message..."></textarea>
+                <div class="button-group">
+
+                  <button id="stt-btn">Speech to Text</button>
+                  <button id="tts-btn">Text to Speech</button>
+                  <button id="img-btn">Image Generation</button>
+                  <button id="send-btn">Send</button>
+                </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
