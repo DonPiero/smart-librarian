@@ -1,5 +1,18 @@
 let token = null;
 let currentConversationId = null;
+let busy = false;
+let recording = false;
+let mediaRecorder;
+let audioChunks = [];
+
+function setBusy(state) {
+  busy = state;
+  document.getElementById("send-btn").disabled = state;
+  document.getElementById("stt-btn").disabled = state;
+  document.getElementById("tts-btn").disabled = state;
+  document.getElementById("img-btn").disabled = state;
+  document.getElementById("message-input").disabled = state;
+}
 
 function showLogin() {
   document.getElementById("login-form").classList.remove("hidden");
@@ -167,41 +180,43 @@ document.getElementById("new-chat").addEventListener("click", () => {
 });
 
 document.getElementById("send-btn").addEventListener("click", async () => {
+  if (busy) return;
   const input = document.getElementById("message-input");
   const text = input.value.trim();
   if (!text) return;
+
   renderMessage("user", text);
   input.value = "";
 
-  if (!currentConversationId) {
-    const convRes = await apiFetch("/conversations", { method: "POST" });
-    const conv = await convRes.json();
-    currentConversationId = conv.id;
-    loadConversations();
-  }
+  setBusy(true);                   // ← move this up to cover conv creation too
+  try {
+    if (!currentConversationId) {
+      const convRes = await apiFetch("/conversations", { method: "POST" });
+      if (!convRes.ok) throw new Error("Failed to create conversation");
+      const conv = await convRes.json();
+      currentConversationId = conv.id;
+      loadConversations();
+    }
 
-  const res = await apiFetch(`/conversations/${currentConversationId}/messages`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content: text })
-  });
-
-  if (res.ok) {
+    const res = await apiFetch(`/conversations/${currentConversationId}/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: text })
+    });
+    if (!res.ok) throw new Error("Message send failed");
     const data = await res.json();
     const lastMsg = data.messages[data.messages.length - 1];
-    renderMessage("assistant", lastMsg.content);
+    if (lastMsg) renderMessage("assistant", lastMsg.content);
+  } catch (err) {
+    console.error(err);
+    renderMessage("assistant", "Something went wrong sending your message.");
+  } finally {
+    setBusy(false);               // ← guarantees release
   }
 });
 
-let mediaRecorder;
-let audioChunks = [];
-let recording = false;
-
 document.getElementById("stt-btn").addEventListener("click", async () => {
-  if (!currentConversationId) {
-    alert("Send your first text message to start a chat before using STT.");
-    return;
-  }
+  if (!currentConversationId || busy) return;
 
   if (!recording) {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -211,6 +226,7 @@ document.getElementById("stt-btn").addEventListener("click", async () => {
     mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
 
     mediaRecorder.onstop = async () => {
+      setBusy(true);
       const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
       const form = new FormData();
       form.append("file", audioBlob, "audio.webm");
@@ -224,46 +240,66 @@ document.getElementById("stt-btn").addEventListener("click", async () => {
         const lastTwo = data.messages.slice(-2);
         lastTwo.forEach(m => renderMessage(m.role, m.content));
       }
+      setBusy(false);
+      document.getElementById("stt-btn").classList.remove("recording");
+      document.getElementById("stt-btn").textContent = "🎤";
+      recording = false;
     };
 
     mediaRecorder.start();
     recording = true;
-    document.getElementById("stt-btn").textContent = "Stop Recording";
+    document.getElementById("stt-btn").classList.add("recording");
+    document.getElementById("stt-btn").textContent = "⏹";
   } else {
     mediaRecorder.stop();
     recording = false;
-    document.getElementById("stt-btn").textContent = "Speech to Text";
+    document.getElementById("stt-btn").textContent = "🎤";
   }
 });
 
 document.getElementById("tts-btn").addEventListener("click", async () => {
-  if (!currentConversationId) return;
-  const res = await apiFetch(`/conversations/${currentConversationId}/tts`);
-  if (!res.ok) return;
+  if (!currentConversationId || busy) return;
+  setBusy(true);
+  try {
+    const res = await apiFetch(`/conversations/${currentConversationId}/tts`);
+    if (!res.ok) throw new Error("TTS failed");
+    const blob = await res.blob();
+    const audio = document.createElement("audio");
+    audio.controls = true;
+    audio.src = URL.createObjectURL(blob);
 
-  const blob = await res.blob();
-  const audio = document.createElement("audio");
-  audio.controls = true;
-  audio.src = URL.createObjectURL(blob);
-
-  const wrap = document.createElement("div");
-  wrap.appendChild(audio);
-  addDownloadLink(wrap, blob, "response.mp3");
-  renderMessage("assistant", wrap, true);
+    const wrap = document.createElement("div");
+    wrap.appendChild(audio);
+    addDownloadLink(wrap, blob, "response.mp3");
+    renderMessage("assistant", wrap, true);
+  } catch (e) {
+    console.error(e);
+    renderMessage("assistant", "Text-to-speech failed.");
+  } finally {
+    setBusy(false);
+  }
 });
 
+
 document.getElementById("img-btn").addEventListener("click", async () => {
-  if (!currentConversationId) return;
-  const res = await apiFetch(`/conversations/${currentConversationId}/image`);
-  if (!res.ok) return;
+  if (!currentConversationId || busy) return;
+  setBusy(true);
+  try {
+    const res = await apiFetch(`/conversations/${currentConversationId}/image`);
+    if (!res.ok) throw new Error("Image generation failed");
+    const blob = await res.blob();
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(blob);
+    img.classList.add("chat-image");
 
-  const blob = await res.blob();
-  const img = document.createElement("img");
-  img.src = URL.createObjectURL(blob);
-  img.classList.add("chat-image");
-
-  const wrap = document.createElement("div");
-  wrap.appendChild(img);
-  addDownloadLink(wrap, blob, "image.png");
-  renderMessage("assistant", wrap, true);
+    const wrap = document.createElement("div");
+    wrap.appendChild(img);
+    addDownloadLink(wrap, blob, "image.png");
+    renderMessage("assistant", wrap, true);
+  } catch (e) {
+    console.error(e);
+    renderMessage("assistant", "Image generation failed.");
+  } finally {
+    setBusy(false);
+  }
 });

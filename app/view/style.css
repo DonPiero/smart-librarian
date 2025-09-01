@@ -145,6 +145,15 @@ button:hover {
   align-items: center;
 }
 
+.sidebar button {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
 .sidebar h3 {
   margin-top: 15%;
   margin-bottom: 5%;
@@ -198,6 +207,9 @@ button:hover {
   flex: 1;
   padding: 1rem;
   overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
 }
 
 .message {
@@ -244,11 +256,26 @@ button:hover {
 
 .button-group {
   display: flex;
-  gap: 0.5rem;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.button-group button {
-  flex: 1;
+.left-actions, .right-actions {
+  display: flex;
+  gap: .5rem;
+}
+
+.left-actions button {
+  width: 100%;      /* don’t stretch */
+  padding: .6rem .6rem;
+  font-size: 1.2rem;
+  border-radius: 100%;
+}
+
+/* recording state */
+#stt-btn.recording {
+  background: #ff4d4f;
+  color: white;
 }
 
 /* MEDIA PREVIEWS */

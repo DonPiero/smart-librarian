@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.controller.chatbot_routes import router as chatbot_router
 from app.controller.auth_routes import router as auth_router
 from app.services.db_connection import init_db
@@ -15,13 +16,9 @@ app.add_middleware(
 )
 
 
-@app.get("/healthy")
-def healthy():
-    return {"status": "ok"}
-
-
 app.include_router(auth_router)
 app.include_router(chatbot_router)
+app.mount("/", StaticFiles(directory="app/view", html=True), name="view")
 
 
 @app.on_event("startup")

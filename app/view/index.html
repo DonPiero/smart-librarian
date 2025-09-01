@@ -7,7 +7,7 @@
 </head>
 <body>
   <div class="container">
-      <div class="auth-box hidden">
+      <div class="auth-box">
 
           <div class="toggle-group">
             <button id="login-toggle" class="toggle-button selected" onclick="showLogin()">Login</button>
@@ -31,7 +31,7 @@
           </form>
       </div>
 
-    <div class="main-page">
+    <div class="main-page hidden">
           <div class="sidebar">
               <button id="new-chat">New Chat</button>
               <button id="logout-button">Logout</button>
@@ -47,11 +47,14 @@
               <div class="input-area">
                 <textarea id="message-input" placeholder="Type your message..."></textarea>
                 <div class="button-group">
-
-                  <button id="stt-btn">Speech to Text</button>
-                  <button id="tts-btn">Text to Speech</button>
-                  <button id="img-btn">Image Generation</button>
-                  <button id="send-btn">Send</button>
+                  <div class="left-actions">
+                    <button id="tts-btn">🔊</button>
+                    <button id="img-btn">🖼️</button>
+                    <button id="stt-btn">🎙️</button>
+                  </div>
+                  <div class="right-actions">
+                    <button id="send-btn"><b>SEND</b></button>
+                  </div>
                 </div>
               </div>
           </div>
