@@ -162,6 +162,7 @@ button:hover {
 }
 
 #chat-list {
+  width: 90%;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -173,15 +174,20 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.4rem 0.6rem;
-  margin-bottom: 0.4rem;
-  border-radius: 6px;
+  padding: 0.5rem 0.5rem 0.5rem 3rem;
+  margin: 0.5rem auto;
+  border-radius: 0.5rem;
   cursor: pointer;
   background: #eef6fc;
 }
 
-.chat-item:hover {
-  background: #dceefd;
+.chat-item button {
+    width: 25%;
+    margin: auto 0 ;
+}
+
+.chat-item button:hover {
+  background: transparent;
 }
 
 .delete-chat {

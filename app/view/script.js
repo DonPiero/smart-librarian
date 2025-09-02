@@ -147,7 +147,7 @@ async function loadConversations() {
     li.onclick = () => openConversation(c.id);
 
     const delBtn = document.createElement("button");
-    delBtn.textContent = "🗑";
+    delBtn.textContent = "❌";
     delBtn.classList.add("delete-chat");
     delBtn.onclick = async (e) => {
       e.stopPropagation();
@@ -249,7 +249,7 @@ document.getElementById("stt-btn").addEventListener("click", async () => {
     mediaRecorder.start();
     recording = true;
     document.getElementById("stt-btn").classList.add("recording");
-    document.getElementById("stt-btn").textContent = "⏹";
+    document.getElementById("stt-btn").textContent = "🛑";
   } else {
     mediaRecorder.stop();
     recording = false;

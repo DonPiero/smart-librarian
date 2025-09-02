@@ -1,7 +1,6 @@
 import base64
 from io import BytesIO
 from fastapi.responses import Response
-from langchain_community.document_loaders.parsers import OpenAIWhisperParser
 from openai import OpenAI
 from app.utils.helpers import bots, get_db
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -129,114 +128,6 @@ def send_message(conversation_id: int,
     }
 
 
-@router.post("/conversations/{conversation_id}/stt",
-             response_model=ConversationWithMessages)
-async def speech_to_text(conversation_id: int,
-                         file: UploadFile = File(...),
-                         db: Session = Depends(get_db),
-                         current_user=Depends(get_current_user)):
-
-    audio_bytes = await file.read()
-    if not audio_bytes:
-        raise HTTPException(status_code=400, detail="Empty audio upload")
-
-    try:
-        bio = BytesIO(audio_bytes)
-        bio.name = file.filename or "audio.wav"
-
-        stt = OpenAIWhisperParser(api_key=MODEL_CONFIG.api_key, model="whisper-1")
-        result = stt.parse(bio)
-
-        if isinstance(result, list):
-            transcript = "".join(
-                getattr(doc, "page_content", str(doc)) for doc in result
-            ).strip()
-        elif hasattr(result, "page_content"):
-            transcript = (result.page_content or "").strip()
-        else:
-            transcript = str(result).strip()
-
-        if not transcript:
-            raise HTTPException(status_code=400, detail="No speech detected.")
-
-        payload = MessageIn(content=transcript)
-        return send_message(conversation_id=conversation_id,
-                            payload=payload,
-                            db=db,
-                            current_user=current_user)
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Transcription failed: {e}")
-    finally:
-        await file.close()
-
-
-@router.get("/conversations/{conversation_id}/tts")
-def text_to_speech(conversation_id: int,
-                     db: Session = Depends(get_db),
-                     current_user=Depends(get_current_user)):
-
-    msg = (
-        db.query(m.Message)
-        .join(m.Conversation)
-        .filter(m.Conversation.id == conversation_id,
-                m.Conversation.user_id == current_user.id,
-                m.Message.role == "assistant")
-        .order_by(m.Message.created_at.desc())
-        .first()
-    )
-    if not msg:
-        raise HTTPException(status_code=404, detail="No assistant message found")
-
-    client = OpenAI(api_key=MODEL_CONFIG.api_key)
-    try:
-        resp = client.audio.speech.create(
-            model="gpt-4o-mini-tts",
-            voice="alloy",
-            input=msg.content.strip()
-        )
-        audio_bytes = resp.read()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"TTS failed: {e}")
-
-    return Response(content=audio_bytes, media_type="audio/mpeg")
-
-
-@router.get("/conversations/{conversation_id}/image")
-def image_generator(conversation_id: int,
-                             db: Session = Depends(get_db),
-                             current_user=Depends(get_current_user)):
-
-    msgs = (
-        db.query(m.Message)
-        .join(m.Conversation)
-        .filter(m.Conversation.id == conversation_id,
-                m.Conversation.user_id == current_user.id)
-        .order_by(m.Message.created_at.desc())
-        .limit(2)
-        .all()
-    )
-    if not msgs:
-        raise HTTPException(status_code=404, detail="No messages found")
-
-    prompt = "\n\n".join([(mm.content or "").strip() for mm in reversed(msgs)]).strip()
-    if not prompt:
-        raise HTTPException(status_code=400, detail="No text to turn into image")
-
-    client = OpenAI(api_key=MODEL_CONFIG.api_key)
-    try:
-        img = client.images.generate(
-            model="gpt-image-1",
-            prompt=prompt,
-            size="512x512",
-        )
-        image_b64 = img.data[0].b64_json
-        image_bytes = base64.b64decode(image_b64)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Image generation failed: {e}")
-
-    return Response(content=image_bytes, media_type="image/png")
-
 @router.delete("/conversations/{conversation_id}")
 def delete_conversation(conversation_id: int,
                         db: Session = Depends(get_db),
@@ -256,3 +147,137 @@ def delete_conversation(conversation_id: int,
 
     bots.pop(conv.id, None)
     return
+
+
+@router.post("/conversations/{conversation_id}/stt",
+             response_model=ConversationWithMessages)
+async def speech_to_text(conversation_id: int,
+                         file: UploadFile = File(...),
+                         db: Session = Depends(get_db),
+                         current_user=Depends(get_current_user)):
+    conv = (
+        db.query(m.Conversation)
+        .filter(m.Conversation.id == conversation_id,
+                m.Conversation.user_id == current_user.id)
+        .first()
+    )
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    audio_bytes = await file.read()
+    await file.close()
+    if not audio_bytes:
+        raise HTTPException(status_code=400, detail="Empty audio upload")
+
+    client = OpenAI()
+
+    bio = BytesIO(audio_bytes)
+    bio.name = file.filename or "audio.webm"
+
+    transcript = ""
+    try:
+        res = client.audio.transcriptions.create(
+            model="gpt-4o-mini-transcribe",
+            file=bio,
+            response_format="json"
+        )
+        transcript = (res.text or "").strip()
+    except Exception:
+        bio.seek(0)
+        res2 = client.audio.transcriptions.create(
+            model="whisper-1",
+            file=bio,
+            response_format="text"
+        )
+        transcript = res2.strip() if isinstance(res2, str) else str(res2 or "").strip()
+
+    if not transcript:
+        raise HTTPException(status_code=400, detail="Empty transcript")
+
+    payload = MessageIn(content=transcript)
+    return send_message(conversation_id=conversation_id,
+                        payload=payload,
+                        db=db,
+                        current_user=current_user)
+
+
+@router.get("/conversations/{conversation_id}/tts")
+def text_to_speech(conversation_id: int,
+                   db: Session = Depends(get_db),
+                   current_user=Depends(get_current_user)):
+
+    msg = (
+        db.query(m.Message)
+        .join(m.Conversation)
+        .filter(m.Conversation.id == conversation_id,
+                m.Conversation.user_id == current_user.id,
+                m.Message.role == "assistant")
+        .order_by(m.Message.created_at.desc())
+        .first()
+    )
+
+    client = OpenAI()
+
+    text_input = (msg.content or "").strip()
+    if not text_input:
+        raise HTTPException(status_code=400, detail="No text to synthesize")
+
+    try:
+        with client.audio.speech.with_streaming_response.create(
+            model="gpt-4o-mini-tts",
+            voice="alloy",
+            input=text_input
+        ) as resp:
+            audio_bytes = resp.read()
+    except Exception:
+        with client.audio.speech.with_streaming_response.create(
+            model="gpt-4o-realtime-preview-2024-12-17",
+            voice="alloy",
+            input=text_input
+        ) as resp:
+            audio_bytes = resp.read()
+
+    return Response(content=audio_bytes, media_type="audio/mpeg")
+
+
+@router.get("/conversations/{conversation_id}/image")
+def image_generator(conversation_id: int,
+                    db: Session = Depends(get_db),
+                    current_user=Depends(get_current_user)):
+
+    msgs = (
+        db.query(m.Message)
+        .join(m.Conversation)
+        .filter(m.Conversation.id == conversation_id,
+                m.Conversation.user_id == current_user.id)
+        .order_by(m.Message.created_at.desc())
+        .limit(2)
+        .all()
+    )
+    if not msgs:
+        raise HTTPException(status_code=404, detail="No messages found")
+
+    prompt = "\n\n".join([(mm.content or "").strip() for mm in reversed(msgs)]).strip()
+    if not prompt:
+        raise HTTPException(status_code=400, detail="No text to turn into image")
+
+    client = OpenAI()
+
+    try:
+        img = client.images.generate(
+            model="gpt-image-1",
+            prompt=prompt,
+            size="512x512",
+        )
+        image_b64 = img.data[0].b64_json
+    except Exception:
+        img = client.images.generate(
+            model="gpt-image-1",
+            prompt=prompt,
+            size="1024x1024"
+        )
+        image_b64 = img.data[0].b64_json
+
+    image_bytes = base64.b64decode(image_b64)
+    return Response(content=image_bytes, media_type="image/png")
+
