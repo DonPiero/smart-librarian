@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smart-librarian
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smart-librarian
+  template:
+    metadata:
+      labels:
+        app: smart-librarian
+    spec:
+      containers:
+        - name: api
+          image: smart-librarian:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: OPENAI_API_KEY
+              value: "REPLACE_ME_WITH_YOUR_KEY"
+            - name: DATABASE_URL
+              value: "sqlite:////app/logs.db"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: smart-librarian
+spec:
+  selector:
+    app: smart-librarian
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+  type: ClusterIP
