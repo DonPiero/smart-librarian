@@ -29,11 +29,13 @@ It exposes a **FastAPI** backend with JWT auth, a minimal **vanilla JS UI**, and
 1) Create `.env` in the project root:
 ```env
 SECRET_KEY="replace-me"
-OPENAI_API_KEY="sk-..."
+OPENAI_API_KEY="replace-me"
 ```
 2)  Build & run:
 ```bash
-docker compose up --build
+docker build -t smart-librarian .
+docker run -p 8000:8000 --env-file .env --name smart-librarian-api smart-librarian
+kubectl apply -f k8s.yaml
 ```
 3)  Open:
 - UI → http://localhost:8000/ 
