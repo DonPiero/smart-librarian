@@ -17,14 +17,14 @@ It exposes a **FastAPI** backend with JWT auth, a minimal **vanilla JS UI**, and
   - **TTS** `/conversations/{id}/tts` → returns `audio/mpeg` generated from the latest assistant reply
   - **Image** `/conversations/{id}/image` → returns a PNG generated from recent chat context
 - **Frontend**: Static HTML/CSS/JS served from `/` with a clean chat UI.
-- **Dockerized**: Single-image build + `docker-compose.yml` for quick runs + Kubernetes for deployment and service.
+- **Dockerized**: Single-image build + `docker-compose.yml` for quick runs + `k8s.yaml` for deployment and service.
 - **CORS enabled** for easy local testing.
 
 ---
 
 ## 🚀 Quickstart
 
-### Option A — Docker (recommended)
+### Option A — Docker + Kubernetes (recommended)
 
 1) Create `.env` in the project root:
 ```env
